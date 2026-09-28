@@ -10,6 +10,7 @@ export interface Monastery {
   state_province: string;
   country: string;
   address_verified: string | null;
+  motherhouse_location?: string | null;
   website_url: string | null;
   contact_person?: string | null;
   contact_email?: string | null;

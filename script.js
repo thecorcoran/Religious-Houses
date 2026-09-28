@@ -112,8 +112,9 @@ function filterAndRender(data = allHouses) {
             const rite = (house.church_rite || '').toLowerCase();
             const notes = (house.notes || '').toLowerCase();
             const addr = (house.address_verified || '').toLowerCase();
+            const motherhouse = (house.motherhouse_location || '').toLowerCase();
 
-            if (!name.includes(searchTerm) && !order.includes(searchTerm) && !state.includes(searchTerm) && !city.includes(searchTerm) && !rite.includes(searchTerm) && !notes.includes(searchTerm) && !addr.includes(searchTerm)) {
+            if (!name.includes(searchTerm) && !order.includes(searchTerm) && !state.includes(searchTerm) && !city.includes(searchTerm) && !rite.includes(searchTerm) && !notes.includes(searchTerm) && !addr.includes(searchTerm) && !motherhouse.includes(searchTerm)) {
                 return false;
             }
         }
@@ -230,6 +231,7 @@ function filterAndRender(data = allHouses) {
                         <p><strong>Order / Institute:</strong> ${escapeHtml(house.religious_order)}</p>
                         <p><strong>Tradition &amp; Rite:</strong> <em>${escapeHtml(house.church_rite)}</em></p>
                         <p><strong>Location:</strong> ${escapeHtml(house.city ? house.city + ', ' : '')}${escapeHtml(house.state_province)}, USA${house.address_verified ? ` &mdash; <span style="color:#666;">${escapeHtml(house.address_verified)}</span>` : ''}</p>
+                        ${house.motherhouse_location ? `<p><strong>Motherhouse / Archabbey:</strong> ${escapeHtml(house.motherhouse_location)}</p>` : ''}
                         ${house.year_founded ? `<p><strong>Year Founded:</strong> ${escapeHtml(house.year_founded)}</p>` : ''}
                         ${house.diocese_eparchy ? `<p><strong>Diocese / Eparchy:</strong> ${escapeHtml(house.diocese_eparchy)}</p>` : ''}
                         ${house.notes ? `<p class="entry-notes">${escapeHtml(house.notes)}</p>` : ''}
@@ -266,6 +268,7 @@ function filterAndRender(data = allHouses) {
                         <div class="popup-meta">
                             📍 ${escapeHtml(house.city ? house.city + ', ' : '')}${escapeHtml(house.state_province)}<br>
                             🏷️ ${house.is_cloistered ? 'Cloistered Contemplative' : 'Apostolic'} &bull; ${house.is_mens_house ? "Men's" : "Women's"}
+                            ${house.motherhouse_location ? `<br>🏛️ <em>Motherhouse:</em> ${escapeHtml(house.motherhouse_location)}` : ''}
                         </div>
                         ${house.website_url ? `<a href="${escapeHtml(house.website_url)}" target="_blank" rel="noopener noreferrer" class="popup-link">Visit Website &rarr;</a>` : ''}
                     </div>

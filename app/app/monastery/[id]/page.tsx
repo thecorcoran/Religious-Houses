@@ -85,6 +85,7 @@ export default async function MonasteryPage({ params }: { params: { id: string }
           <p><strong>Status:</strong> {house.is_cloistered ? 'Cloistered / Contemplative' : 'Apostolic / Active'}</p>
           {house.diocese_eparchy && <p><strong>Diocese / Eparchy:</strong> {house.diocese_eparchy}</p>}
           <p><strong>Location:</strong> {house.address_verified || `${house.state_province}, ${house.country}`}</p>
+          {house.motherhouse_location && <p><strong>Motherhouse / Archabbey:</strong> {house.motherhouse_location}</p>}
           {house.year_founded && <p><strong>Founded:</strong> {house.year_founded}</p>}
           
           {house.website_url && (

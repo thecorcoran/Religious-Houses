@@ -62,6 +62,7 @@ function MonasteryCard({ house }: { house: Monastery }) {
       <p><strong>Order:</strong> {house.religious_order}</p>
       <p><strong>Rite:</strong> {house.church_rite}</p>
       <p><strong>Location:</strong> {house.city ? `${house.city}, ` : ''}{house.state_province}, {house.country}</p>
+      {house.motherhouse_location && <p><strong>Motherhouse:</strong> {house.motherhouse_location}</p>}
       {house.year_founded && <p><strong>Founded:</strong> {house.year_founded}</p>}
       
       <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -116,8 +117,9 @@ export default function DirectoryClient({ allHouses, rites }: DirectoryClientPro
         const matchRite = house.church_rite.toLowerCase().includes(query);
         const matchNotes = (house.notes || '').toLowerCase().includes(query);
         const matchAddress = (house.address_verified || '').toLowerCase().includes(query);
+        const matchMotherhouse = (house.motherhouse_location || '').toLowerCase().includes(query);
 
-        if (!matchName && !matchOrder && !matchState && !matchCity && !matchRite && !matchNotes && !matchAddress) {
+        if (!matchName && !matchOrder && !matchState && !matchCity && !matchRite && !matchNotes && !matchAddress && !matchMotherhouse) {
           return false;
         }
       }
