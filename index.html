@@ -3,63 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catholic Religious Houses Directory | US & North America</title>
-    <meta name="description" content="A comprehensive directory of Catholic religious houses (monasteries, abbeys, convents, friaries, and oratories) across the United States and North America.">
+    <title>Directory of Catholic Religious Houses in the United States</title>
+    <meta name="description" content="An exhaustive, analytical directory and cartographic visual display of Catholic religious houses across Latin and Eastern Catholic Churches in the United States.">
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/SJPMe+HoISo5jT/W8="
-    crossorigin=""/>
+    <!-- Leaflet CSS without SRI mismatch -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
+    <!-- Tufte Design System Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <header>
-        <h1>🧭 North American Catholic Religious Houses Directory</h1>
-        <p>A searchable directory of Catholic religious houses across Latin and Eastern Rites.</p>
-    </header>
+    <div class="tufte-container">
+        
+        <header class="tufte-header">
+            <h1>Directory of Catholic Religious Houses</h1>
+            <p class="subtitle">
+                An exhaustive register of autonomous abbeys, monasteries, convents, friaries, and canonical houses across the 24 <em>sui iuris</em> Catholic Churches in the United States.
+            </p>
 
-    <main>
-        
-        <div class="tabs">
-            <button class="tab-button active" onclick="showView('list-view')">📋 List View</button>
-            <button class="tab-button" onclick="showView('map-view')">🗺️ Interactive Map</button>
-        </div>
-        
-        <section id="controls">
-            <h2>🔎 Filters & Search</h2>
+            <div class="tufte-stats-grid">
+                <div class="stat-item">
+                    <span class="stat-num" id="stat-total">52</span>
+                    <span class="stat-label">Verified Houses</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num" id="stat-eastern">18</span>
+                    <span class="stat-label">Eastern Catholic Monasteries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num" id="stat-latin">34</span>
+                    <span class="stat-label">Latin Rite Houses</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num" id="stat-cloistered">27</span>
+                    <span class="stat-label">Cloistered / Contemplative</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num" id="stat-states">26</span>
+                    <span class="stat-label">States & Jurisdictions</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="tufte-controls">
+            <h2>Filter &amp; Query Directory</h2>
             
-            <div class="controls-grid">
-                <div class="control-group">
-                    <label for="search-bar">Search (Name, Order, City):</label>
-                    <input type="text" id="search-bar" placeholder="e.g. Benedictine, Gethsemani, Carmel..." oninput="filterAndRender()">
+            <div class="controls-row">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label for="search-bar">Search (House Name, Order, City, Founder):</label>
+                    <input type="text" id="search-bar" placeholder="e.g. Benedictine, Studite, Maronite, Gethsemani, Carmel..." oninput="filterAndRender()">
                 </div>
 
-                <div class="control-group">
+                <div class="form-group">
+                    <label for="filter-rite">Church Rite &amp; Tradition:</label>
+                    <select id="filter-rite" onchange="filterAndRender()">
+                        <option value="all">All Rites (Latin &amp; Eastern)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="filter-state">State / Province:</label>
                     <select id="filter-state" onchange="filterAndRender()">
-                        <option value="all">All States / Provinces</option>
+                        <option value="all">All States</option>
                     </select>
                 </div>
 
-                <div class="control-group">
-                    <label for="filter-rite">Church Rite:</label>
-                    <select id="filter-rite" onchange="filterAndRender()">
-                        <option value="all">All Rites</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
+                <div class="form-group">
                     <label for="filter-gender">Gender:</label>
                     <select id="filter-gender" onchange="filterAndRender()">
-                        <option value="all">All (Men's & Women's)</option>
-                        <option value="mens">Men's Houses</option>
-                        <option value="womens">Women's Houses</option>
+                        <option value="all">All (Men's &amp; Women's)</option>
+                        <option value="mens">Men's Communities</option>
+                        <option value="womens">Women's Communities</option>
                     </select>
                 </div>
-                
-                <div class="control-group">
-                    <label for="filter-cloistered">Charism / Status:</label>
+
+                <div class="form-group">
+                    <label for="filter-cloistered">Charism / Canonical Status:</label>
                     <select id="filter-cloistered" onchange="filterAndRender()">
                         <option value="all">All Charisms</option>
                         <option value="true">Cloistered / Contemplative</option>
@@ -67,52 +87,61 @@
                     </select>
                 </div>
 
-                <div class="control-group">
-                    <label for="sort-by">Sort By:</label>
+                <div class="form-group">
+                    <label for="sort-by">Sort Records By:</label>
                     <select id="sort-by" onchange="filterAndRender()">
-                        <option value="name-asc">Name (A-Z)</option>
-                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="name-asc">Name (A &rarr; Z)</option>
+                        <option value="name-desc">Name (Z &rarr; A)</option>
                         <option value="year-asc">Year Founded (Oldest First)</option>
                         <option value="year-desc">Year Founded (Newest First)</option>
-                        <option value="state-asc">State / Province</option>
+                        <option value="state-asc">State (A &rarr; Z)</option>
                     </select>
                 </div>
             </div>
 
-            <div id="filter-status-bar" style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                <span id="filter-summary" style="font-size: 0.9em; color: #555;"></span>
-                <button type="button" id="reset-filters-btn" onclick="resetFilters()" style="display: none; padding: 5px 12px; background: #fee2e2; color: #991b1b; border: 1px solid #f87171; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85em;">
-                    Reset Filters ✕
+            <div class="filter-bar-status">
+                <span id="filter-summary">Loading complete directory...</span>
+                <button type="button" id="reset-filters-btn" class="btn-reset" onclick="resetFilters()" style="display: none;">
+                    Reset All Filters
                 </button>
             </div>
         </section>
 
-        <hr>
+        <div class="layout-split">
+            
+            <section class="listings-column">
+                <div class="listings-header">
+                    <h2>Directory Entries</h2>
+                    <span class="listings-count" id="house-count-display">0 Houses</span>
+                </div>
 
-        <section id="list-view" class="view-content active">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="margin: 0;">🏠 Houses Found: <span id="house-count">0</span></h2>
-            </div>
-            <div id="monastery-list">
-                <p>Loading directory data...</p>
-            </div>
-        </section>
+                <div id="monastery-list" class="monastery-list">
+                    <p>Rendering directory entries...</p>
+                </div>
+            </section>
 
-        <section id="map-view" class="view-content" style="display: none;">
-            <h2>🗺️ Interactive Geographic Map</h2>
-            <div id="map"></div>
-        </section>
-        
-    </main>
+            <aside class="map-column">
+                <div class="map-wrapper">
+                    <div class="map-header">
+                        <strong>Geographical Cartography</strong>
+                        <span id="map-marker-count">Showing 52 points</span>
+                    </div>
+                    <div id="map"></div>
+                </div>
+            </aside>
 
-    <footer>
-        <p>&copy; 2026 Catholic Religious Houses Directory. Verified open-source directory data.</p>
-    </footer>
+        </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20n6h+A/O9F0V6/bLd5P2pP8l+T5fFk5v6E9aX7Q/9k="
-    crossorigin=""></script>
-    
+        <footer class="tufte-footer">
+            <p>
+                Catholic Religious Houses Directory &bull; Formatted according to Edward Tufte's principles of analytical evidence and visual clarity &bull; Open Source Data Verification
+            </p>
+        </footer>
+
+    </div>
+
+    <!-- Leaflet JS without SRI mismatch -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
