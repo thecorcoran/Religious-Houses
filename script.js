@@ -36,6 +36,7 @@ function filterAndRender(data = allHouses) {
     // 1. Get filter/sort criteria
     const sortBy = document.getElementById('sort-by').value;
     const filterRite = document.getElementById('filter-rite').value;
+    const filterState = document.getElementById('filter-state') ? document.getElementById('filter-state').value : 'all';
     const filterGender = document.getElementById('filter-gender').value;
     const filterCloistered = document.getElementById('filter-cloistered').value;
     const searchTerm = document.getElementById('search-bar').value.trim().toLowerCase();
@@ -56,6 +57,9 @@ function filterAndRender(data = allHouses) {
                 return false;
             }
         }
+
+        // Filter by State
+        if (filterState !== 'all' && house.state_province !== filterState) return false;
 
         // Filter by Rite
         if (filterRite !== 'all' && house.church_rite !== filterRite) return false;
@@ -91,12 +95,26 @@ function filterAndRender(data = allHouses) {
         }
     });
 
-    // 4. Render the List View
+    // 4. Update Filter Status Bar
+    const isFiltered = searchTerm !== '' || filterState !== 'all' || filterRite !== 'all' || filterGender !== 'all' || filterCloistered !== 'all';
+    const resetBtn = document.getElementById('reset-filters-btn');
+    const summarySpan = document.getElementById('filter-summary');
+
+    if (resetBtn) {
+        resetBtn.style.display = isFiltered ? 'inline-block' : 'none';
+    }
+    if (summarySpan) {
+        summarySpan.textContent = isFiltered
+            ? `Filtering active: showing ${filteredHouses.length} of ${allHouses.length} houses`
+            : `Showing all ${allHouses.length} houses`;
+    }
+
+    // 5. Render the List View
     monasteryList.innerHTML = '';
     houseCount.textContent = filteredHouses.length;
     
     if (filteredHouses.length === 0) {
-        monasteryList.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 30px;">No houses match the current filters. Please adjust your criteria.</p>';
+        monasteryList.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 40px; background:#fff; border-radius:8px; border:1px dashed #cbd5e1;">No religious houses match your current filter criteria. <button onclick="resetFilters()" style="margin-left:8px; padding:4px 8px; cursor:pointer;">Clear Filters</button></p>';
     }
 
     filteredHouses.forEach(house => {
@@ -104,24 +122,27 @@ function filterAndRender(data = allHouses) {
         card.className = 'monastery-card';
         
         const websiteLink = house.website_url 
-            ? `<p><a href="${escapeHtml(house.website_url)}" target="_blank" rel="noopener noreferrer">Visit Website ↗</a></p>`
-            : '';
+            ? `<a href="${escapeHtml(house.website_url)}" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>`
+            : '<span></span>';
 
         const directionsLink = house.map_lat_lng
-            ? `<a href="https://www.google.com/maps/search/?api=1&query=${house.map_lat_lng[0]},${house.map_lat_lng[1]}" target="_blank" rel="noopener noreferrer" style="font-size:0.85em; color:#666;">View on Maps ↗</a>`
-            : '';
+            ? `<a href="https://www.google.com/maps/search/?api=1&query=${house.map_lat_lng[0]},${house.map_lat_lng[1]}" target="_blank" rel="noopener noreferrer" style="font-size:0.85em; color:#475569;">View on Google Maps ↗</a>`
+            : (house.address_verified ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(house.address_verified)}" target="_blank" rel="noopener noreferrer" style="font-size:0.85em; color:#475569;">Directions ↗</a>` : '');
 
         card.innerHTML = `
             <h3>${escapeHtml(house.name)}</h3>
-            <p><strong>Rite:</strong> ${escapeHtml(house.church_rite)}</p>
+            <div class="badge-row">
+                <span class="badge ${house.is_mens_house ? 'badge-mens' : 'badge-womens'}">${house.is_mens_house ? "Men's" : "Women's"}</span>
+                <span class="badge ${house.is_cloistered ? 'badge-cloistered' : 'badge-apostolic'}">${house.is_cloistered ? 'Cloistered' : 'Apostolic'}</span>
+                <span class="badge badge-type">${escapeHtml(house.house_type || 'Monastery')}</span>
+            </div>
             <p><strong>Order:</strong> ${escapeHtml(house.religious_order)}</p>
+            <p><strong>Rite:</strong> ${escapeHtml(house.church_rite)}</p>
             <p><strong>Location:</strong> ${escapeHtml(house.city ? house.city + ', ' : '')}${escapeHtml(house.state_province)}, ${escapeHtml(house.country)}</p>
             ${house.year_founded ? `<p><strong>Founded:</strong> ${escapeHtml(house.year_founded)}</p>` : ''}
-            <p><strong>Type:</strong> ${escapeHtml(house.house_type || 'Monastery')} | ${house.is_mens_house ? "Men's House" : "Women's House"}</p>
-            <p><strong>Status:</strong> ${house.is_cloistered ? 'Cloistered / Contemplative' : 'Apostolic / Active'}</p>
-            ${house.diocese_eparchy ? `<p><strong>Diocese/Eparchy:</strong> ${escapeHtml(house.diocese_eparchy)}</p>` : ''}
-            ${house.notes ? `<p style="font-size:0.85em; color:#555; border-top:1px solid #eee; padding-top:6px; margin-top:8px;">${escapeHtml(house.notes)}</p>` : ''}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px solid #eee;">
+            ${house.diocese_eparchy ? `<p><strong>Diocese:</strong> ${escapeHtml(house.diocese_eparchy)}</p>` : ''}
+            ${house.notes ? `<p style="font-size:0.85em; color:#475569; border-top:1px solid #f1f5f9; padding-top:6px; margin-top:8px;">${escapeHtml(house.notes)}</p>` : ''}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:12px; border-top:1px solid #e2e8f0;">
                 ${websiteLink}
                 ${directionsLink}
             </div>
@@ -129,7 +150,7 @@ function filterAndRender(data = allHouses) {
         monasteryList.appendChild(card);
     });
 
-    // 5. Update Map Markers
+    // 6. Update Map Markers
     if (map !== null && markersLayer !== null) {
         markersLayer.clearLayers();
         const validBounds = [];
@@ -138,11 +159,12 @@ function filterAndRender(data = allHouses) {
             if (house.map_lat_lng && Array.isArray(house.map_lat_lng) && house.map_lat_lng.length === 2) {
                 const marker = L.marker(house.map_lat_lng);
                 const popupContent = `
-                    <div style="min-width:180px;">
-                        <b style="color:#003366;">${escapeHtml(house.name)}</b><br>
-                        <span style="font-size:0.85em;">${escapeHtml(house.religious_order)}</span><br>
-                        <span style="font-size:0.85em; color:#555;">${escapeHtml(house.city ? house.city + ', ' : '')}${escapeHtml(house.state_province)}</span><br>
-                        ${house.website_url ? `<a href="${escapeHtml(house.website_url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.85em;">Website ↗</a>` : ''}
+                    <div style="min-width:200px; line-height:1.4;">
+                        <b style="color:#003366; font-size:1.05em;">${escapeHtml(house.name)}</b><br>
+                        <span style="font-size:0.85em; font-weight:600;">${escapeHtml(house.religious_order)}</span><br>
+                        <span style="font-size:0.8em; color:#64748b;">${escapeHtml(house.church_rite)}</span><br>
+                        <span style="font-size:0.85em; display:block; margin:4px 0;">📍 ${escapeHtml(house.city ? house.city + ', ' : '')}${escapeHtml(house.state_province)}</span>
+                        ${house.website_url ? `<a href="${escapeHtml(house.website_url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.85em; color:#003366; font-weight:bold;">Visit Website ↗</a>` : ''}
                     </div>
                 `;
                 marker.bindPopup(popupContent);
@@ -159,20 +181,42 @@ function filterAndRender(data = allHouses) {
     }
 }
 
-// Function to populate the Rite filter options
+// Function to populate Filter dropdowns
 function populateFilters(data) {
+    // 1. Rites
     const rites = Array.from(new Set(data.map(house => house.church_rite).filter(Boolean))).sort();
     const filterRiteSelect = document.getElementById('filter-rite');
-
-    // Remove existing non-default options
     filterRiteSelect.innerHTML = '<option value="all">All Rites</option>';
-
     rites.forEach(rite => {
         const option = document.createElement('option');
         option.value = rite;
         option.textContent = rite;
         filterRiteSelect.appendChild(option);
     });
+
+    // 2. States / Provinces
+    const states = Array.from(new Set(data.map(house => house.state_province).filter(Boolean))).sort();
+    const filterStateSelect = document.getElementById('filter-state');
+    if (filterStateSelect) {
+        filterStateSelect.innerHTML = `<option value="all">All States / Provinces (${states.length})</option>`;
+        states.forEach(state => {
+            const option = document.createElement('option');
+            option.value = state;
+            option.textContent = state;
+            filterStateSelect.appendChild(option);
+        });
+    }
+}
+
+// Function to reset all filters
+function resetFilters() {
+    document.getElementById('search-bar').value = '';
+    document.getElementById('sort-by').value = 'name-asc';
+    document.getElementById('filter-rite').value = 'all';
+    if (document.getElementById('filter-state')) document.getElementById('filter-state').value = 'all';
+    document.getElementById('filter-gender').value = 'all';
+    document.getElementById('filter-cloistered').value = 'all';
+    filterAndRender();
 }
 
 // Function to switch between list and map view
@@ -203,19 +247,20 @@ async function loadDataAndInit() {
             response = await fetch('./data/monasteries.json');
         }
         if (!response.ok) {
-            throw new Error('Failed to load monasteries.json from root or data/');
+            throw new Error('Failed to load monasteries.json');
         }
         allHouses = await response.json();
         
-        initMap(); // Initialize the map after loading data
+        initMap();
         populateFilters(allHouses);
         filterAndRender();
         
     } catch (error) {
         console.error("Error loading data:", error);
-        monasteryList.innerHTML = '<p style="color:red;">Error: Could not load directory data. Please check network/file permissions.</p>';
+        monasteryList.innerHTML = '<p style="color:red;">Error: Could not load directory data.</p>';
     }
 }
 
 // Start the application
 loadDataAndInit();
+
